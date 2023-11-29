@@ -8,8 +8,6 @@ from code_loader.contract.datasetclasses import PreprocessResponse
 from cs_sem_seg.utils.gcs_utils import _connect_to_gcs_and_return_bucket
 from cs_sem_seg.configs import BUCKET_NAME, TRAIN_PERCENT, SEED, NUM_CLASSES
 
-import torchvision.transforms as transformexit(s
-from transform import *
 
 
 class Cityscapes:
@@ -81,25 +79,6 @@ class Cityscapes:
     def decode_target(cls, target):
         target[target == 255] = 19
         return cls.train_id_to_color[target]
-
-    def org_preprocess(self):
-        self.brightness = 0.5
-        self.contrast = 0.5
-        self.saturation = 0.5
-        ## pre-processing
-        self.to_tensor = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(cfg.mean, cfg.std),
-        ])
-        self.trans = Compose([
-            ColorJitter(
-                brightness=cfg.brightness,
-                contrast=cfg.contrast,
-                saturation=cfg.saturation),
-            HorizontalFlip(),
-            RandomScale(cfg.scales),
-            RandomCrop(cfg.crop_size)
-        ])
 
 
 SUPERCATEGORY_CLASSES = np.unique([Cityscapes.classes[i].category for i in range(len(Cityscapes.classes)) if
