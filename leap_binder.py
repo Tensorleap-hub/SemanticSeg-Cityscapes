@@ -62,12 +62,13 @@ def get_categorical_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
     return encoded_mask
 
 
-def get_metadata_json(idx: int, data: PreprocessResponse) -> Dict[str, str]:
+
+def metadata_json_data(idx: int, data: PreprocessResponse) -> Dict[str, Union[str, Any]]:
     cloud_path = data.data['metadata'][idx]
     fpath = _download(cloud_path)
     with open(fpath, 'r') as f:
-        metadata_dict = json.loads(f.read())
-    return metadata_dict
+        json_data = json.loads(f.read())
+    return dict(json_data)
 
 
 def metadata_idx(idx: int, data: PreprocessResponse) -> int:
@@ -94,33 +95,13 @@ def metadata_brightness(idx: int, data: PreprocessResponse) -> ndarray:
     img = non_normalized_input_image(idx % data.data["real_size"], data)
     return np.mean(img)
 
+
 def metadata_filename_city_dataset(idx: int, data: PreprocessResponse) -> Dict[str, Any]:
     res = {'file_names': data.data['file_names'][idx],
-           'cities': data.data['cities'][idx],
-           'dataset': data.data['dataset'][idx % data.data["real_size"]]
+           'cities': data.data['cities'][idx]
            }
     return res
 
-
-def metadata_json_data(idx: int, data: PreprocessResponse) -> Dict[str, Union[str, Any]]:
-    json_data = get_metadata_json(idx, data)
-    gpsHeading = json_data['gpsHeading'] if data.data['dataset'][idx] == "cityscapes_od" else DEFAULT_GPS_HEADING
-    gpsLatitude = json_data['gpsLatitude'] if data.data['dataset'][idx] == "cityscapes_od" else DEFAULT_GPS_LATITUDE
-    gpsLongitude = json_data['gpsLongitude'] if data.data['dataset'][idx] == "cityscapes_od" else DEFAULT_GPS_LONGTITUDE
-    outsideTemperature = json_data['outsideTemperature'] if data.data['dataset'][
-                                                                idx] == "cityscapes_od" else DEFAULT_TEMP
-    speed = json_data['speed'] if data.data['dataset'][idx] == "cityscapes_od" else DEFAULT_SPEED
-    yawRate = json_data['yawRate'] if data.data['dataset'][idx] == "cityscapes_od" else DEFAULT_YAW_RATE
-
-    res = {'gpsHeading': gpsHeading,
-           'gpsLatitude': gpsLatitude,
-           'gpsLongitude': gpsLongitude,
-           'outsideTemperature': outsideTemperature,
-           'speed': speed,
-           'yawRate': yawRate
-           }
-
-    return res
 
 # ----------------------------------- Visualizers ------------------------------------------
 
@@ -157,8 +138,8 @@ leap_binder.set_ground_truth(ground_truth_mask, 'mask')
 leap_binder.add_custom_metric(class_mean_iou, name=f"iou_class")
 leap_binder.add_custom_metric(mean_iou, name=f"iou")
 
-leap_binder.set_metadata(metadata_class_percent, 'class_percent')
 leap_binder.set_metadata(metadata_idx, 'idx')
+leap_binder.set_metadata(metadata_class_percent, 'class_percent')
 leap_binder.set_metadata(metadata_brightness, 'brightness')
 leap_binder.set_metadata(metadata_filename_city_dataset, 'filename_city_dataset')
 leap_binder.set_metadata(metadata_json_data, 'json_data')
