@@ -4,6 +4,9 @@ import numpy as np
 BUCKET_NAME = 'tl-private-datasets'
 PROJECT_ID = 'tl-private-dev-project'
 
+# --------------- Kili --------------------
+KILI_PROJECT_ID = "clpbb902w01bg087p9o6l0691"
+
 # --------------- Data --------------------
 NORM_CS = False
 SEED = 42
