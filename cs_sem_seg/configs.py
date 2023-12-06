@@ -1,18 +1,19 @@
+import os
 import numpy as np
-
 # --------------- GCS --------------------
-BUCKET_NAME = 'tl-private-datasets'
-PROJECT_ID = 'tl-private-dev-project'
+BUCKET_NAME = 'label-backend-production'
+# PROJECT_ID = 'tl-private-dev-project'
 
 # --------------- Kili --------------------
 KILI_PROJECT_ID = "clpbb902w01bg087p9o6l0691"
 
 # --------------- Data --------------------
+LOCAL_DIR = os.path.join("~/.cache/kili/projects", KILI_PROJECT_ID, "assets")       # todo: change to nfs
 NORM_CS = False
 SEED = 42
 NUM_CLASSES = 19
 IMAGE_SIZE = (2048, 1024)
-TRAIN_SIZE, VAL_SIZE = 1000, 500
+TRAIN_SIZE, VAL_SIZE, TEST_SIZE = 1000, 500, 500
 TRAIN_PERCENT = 0.8
 
 SUPERCATEGORY_GROUNDTRUTH = False

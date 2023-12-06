@@ -84,6 +84,7 @@ class Cityscapes:
 SUPERCATEGORY_CLASSES = np.unique([Cityscapes.classes[i].category for i in range(len(Cityscapes.classes)) if
                                    Cityscapes.classes[i].train_id < NUM_CLASSES])
 CATEGORIES = [Cityscapes.classes[i].name for i in range(len(Cityscapes.classes)) if Cityscapes.classes[i].train_id < NUM_CLASSES]
+CATEGORIES_IDS = dict(zip(CATEGORIES, np.arange(len(CATEGORIES))))
 
 
 def get_cityscapes_data() -> List[PreprocessResponse]:

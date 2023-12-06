@@ -14,39 +14,42 @@ from numpy import ndarray
 
 from cs_sem_seg.configs import *
 from cs_sem_seg.data.cs_data import CATEGORIES
-from cs_sem_seg.data.preprocess import subset_images
+from cs_sem_seg.utils.tl_utils import subset_images
 from cs_sem_seg.visualizers.visualizers import get_loss_overlayed_img, get_cityscape_mask_img, get_masked_img
 from cs_sem_seg.visualizers.visualizers_utils import unnormalize_image
 from cs_sem_seg.metrics import mean_iou, class_mean_iou
-from cs_sem_seg.utils.gcs_utils import _download
-from cs_sem_seg.configs import IMAGE_SIZE, AUGMENT, TRAIN_SIZE
+from cs_sem_seg.utils.kili_utils import _download, get_masks
+from cs_sem_seg.configs import IMAGE_SIZE, LOCAL_DIR
 from cs_sem_seg.data.cs_data import Cityscapes
 
 
 # ----------------------------------- Input ------------------------------------------
 
 def non_normalized_input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
-    data = data.data
-    cloud_path = data['image_path'][idx % data["real_size"]]
-    fpath = _download(str(cloud_path))
+    # cloud_path = data['image_path'][idx % data["real_size"]]
+    # kili_external_id = data['image_path'][idx % data["real_size"]]
+    data = data.data[idx]
+    kili_external_id = data['externalId']
+    # img_url = data['content']
+    # fpath = download(kili_external_id, img_url, LOCAL_DIR)
+    fpath = _download(kili_external_id)
     img = np.array(Image.open(fpath).convert('RGB').resize(IMAGE_SIZE)) / 255.
     return img
 
 
 def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
-    img = non_normalized_input_image(idx % data.data["real_size"], data)
+    img = non_normalized_input_image(idx, data)
     normalized_image = (img - IMAGE_MEAN) / IMAGE_STD
     return normalized_image.astype(float)
-
-
 
 # ----------------------------------- GT ------------------------------------------
 
 def ground_truth_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
-    mask = get_categorical_mask(idx % data.data["real_size"], data)
-    return tf.keras.utils.to_categorical(mask, num_classes=20).astype(float)[...,
-           :19]  # Remove background class from cross-entropy
-
+    # mask = get_categorical_mask(idx, data)
+    kili_external_id = data.data[idx]['externalId']
+    mask, _ = get_masks(kili_external_id)
+    # return tf.keras.utils.to_categorical(mask, num_classes=20).astype(float)[..., :19]  # Remove background class from cross-entropy
+    return mask
 
 # ----------------------------------- Metadata ------------------------------------------
 
