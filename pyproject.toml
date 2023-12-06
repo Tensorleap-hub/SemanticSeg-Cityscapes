@@ -17,6 +17,7 @@ transformers = "^4.35.2"
 torch = "^2.1.1"
 onnx = "^1.15.0"
 kili = "^2.148.3"
+opencv-python = "^4.8.1.78"
 
 
 [build-system]
