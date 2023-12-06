@@ -94,10 +94,10 @@ def get_masks(kili_external_id: str):
         output_format='parsed_label',
     )
     annotations = labels[0].jobs["OBJECT_DETECTION_JOB"].annotations
-    cat_cnt = np.zeros(NUM_CLASSES)
+    cat_cnt = np.zeros(NUM_CLASSES).astype(np.int32)
     res_mask = np.zeros((IMAGE_SIZE[1], IMAGE_SIZE[0], NUM_CLASSES)).astype(np.int32)
     for ann in annotations:
-        cat = ann.category.name.lower()
+        cat = ann.category.name.lower().replace('_', ' ')
         if cat not in CATEGORIES_IDS:
             continue
         cat_i = CATEGORIES_IDS[cat]
@@ -107,4 +107,3 @@ def get_masks(kili_external_id: str):
     return res_mask, cat_cnt
 
 
-# cv2.polylines(mask, np.int32([ann]), 1, (255,255,255))

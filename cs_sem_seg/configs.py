@@ -1,8 +1,8 @@
 import os
 import numpy as np
 # --------------- GCS --------------------
-BUCKET_NAME = 'label-backend-production'
-# PROJECT_ID = 'tl-private-dev-project'
+BUCKET_NAME = 'tl-private-dataset'
+PROJECT_ID = 'tl-private-dev-project'
 
 # --------------- Kili --------------------
 KILI_PROJECT_ID = "clpbb902w01bg087p9o6l0691"

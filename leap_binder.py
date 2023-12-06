@@ -26,8 +26,6 @@ from cs_sem_seg.data.cs_data import Cityscapes
 # ----------------------------------- Input ------------------------------------------
 
 def non_normalized_input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
-    # cloud_path = data['image_path'][idx % data["real_size"]]
-    # kili_external_id = data['image_path'][idx % data["real_size"]]
     data = data.data[idx]
     kili_external_id = data['externalId']
     # img_url = data['content']
@@ -45,10 +43,8 @@ def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
 # ----------------------------------- GT ------------------------------------------
 
 def ground_truth_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
-    # mask = get_categorical_mask(idx, data)
     kili_external_id = data.data[idx]['externalId']
     mask, _ = get_masks(kili_external_id)
-    # return tf.keras.utils.to_categorical(mask, num_classes=20).astype(float)[..., :19]  # Remove background class from cross-entropy
     return mask
 
 # ----------------------------------- Metadata ------------------------------------------
@@ -62,37 +58,33 @@ def get_categorical_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
     return encoded_mask
 
 
-
-def metadata_json_data(idx: int, data: PreprocessResponse) -> Dict[str, Union[str, Any]]:
-    cloud_path = data.data['metadata'][idx]
-    fpath = _download(cloud_path)
-    with open(fpath, 'r') as f:
-        json_data = json.loads(f.read())
-    return dict(json_data)
-
-
 def metadata_idx(idx: int, data: PreprocessResponse) -> int:
     """ add TL index """
     return idx
 
 
-def metadata_class_percent(idx: int, data: PreprocessResponse) -> dict:
-    res = {}
-    mask = get_categorical_mask(idx % data.data["real_size"], data)
-    unique, counts = np.unique(mask, return_counts=True)
-    unique_per_obj = dict(zip(unique, counts))
-    for i, c in enumerate(CATEGORIES + ["background"]):
-        count_obj = unique_per_obj.get(float(i))
-        if count_obj is not None:
-            percent_obj = count_obj / mask.size
-        else:
-            percent_obj = 0.0
-        res[f'{c}'] = percent_obj
+
+def metadata_json_data(idx: int, data: PreprocessResponse) -> Dict[str, Union[str, Any]]:
+    data = data.data[idx]
+    json_data = dict()
+    json_data['kili_external_id'] = data['externalId']
+    json_data.update(data['jsonMetadata'])
+    return json_data
+
+
+
+def metadata_class(idx: int, data: PreprocessResponse) -> dict:
+    kili_external_id = data.data[idx]['externalId']
+    mask, cat_cnt = get_masks(kili_external_id)
+    res = dict(zip([f'{c}_obj_cnt' for c in CATEGORIES], cat_cnt))
+    for i, c in enumerate(CATEGORIES):
+        mask_i = mask[..., i]
+        res[f'{c}_percent'] = (mask_i.sum() / mask_i.size).round(3).astype(np.float32)
     return res
 
 
 def metadata_brightness(idx: int, data: PreprocessResponse) -> ndarray:
-    img = non_normalized_input_image(idx % data.data["real_size"], data)
+    img = non_normalized_input_image(idx, data)
     return np.mean(img)
 
 
@@ -139,10 +131,9 @@ leap_binder.add_custom_metric(class_mean_iou, name=f"iou_class")
 leap_binder.add_custom_metric(mean_iou, name=f"iou")
 
 leap_binder.set_metadata(metadata_idx, 'idx')
-leap_binder.set_metadata(metadata_class_percent, 'class_percent')
-leap_binder.set_metadata(metadata_brightness, 'brightness')
-leap_binder.set_metadata(metadata_filename_city_dataset, 'filename_city_dataset')
 leap_binder.set_metadata(metadata_json_data, 'json_data')
+leap_binder.set_metadata(metadata_class, 'class')
+leap_binder.set_metadata(metadata_brightness, 'brightness')
 
 leap_binder.set_visualizer(image_visualizer, 'image_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(mask_visualizer, 'mask_visualizer', LeapDataType.ImageMask)
