@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "domain_gap"
+name = "semantic_seg"
 version = "0.1.0"
 description = ""
 authors = ["Danielle Ben Bashat <daniellebenba@gmail.com>"]
 readme = "README.md"
-packages = [{include = "domain_gap"}]
+packages = [{include = "semantic_seg"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.10"
@@ -13,6 +13,11 @@ code-loader = "^1.0.18"
 matplotlib = "^3.7.1"
 google-cloud-storage = "^2.10.0"
 tensorflow = "^2.15.0"
+transformers = "^4.35.2"
+torch = "^2.1.1"
+onnx = "^1.15.0"
+kili = "^2.148.3"
+opencv-python = "^4.8.1.78"
 
 
 [build-system]

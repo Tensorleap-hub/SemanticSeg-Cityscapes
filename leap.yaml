@@ -1,13 +1,11 @@
-codeIntegrationId: 655f59ecd179f900194ca37a
+codeIntegrationId: 65705342a20aba0019835a9f
 projectId: 655f59d3d179f900194ca376
-secretId: 655f5a9dd179f900194ca380
+secretId: 65686dd009a3b800193ad25a
 entryFile: leap_binder.py
 include:
     - leap_binder.py
     - cs_sem_seg/configs.py
     - cs_sem_seg/metrics.py
+    - cs_sem_seg/loss.py
+    - cs_sem_seg/utils/*
     - cs_sem_seg/data/cs_data.py
-    - cs_sem_seg/data/preprocess.py
-    - cs_sem_seg/utils/gcs_utils.py
-    - cs_sem_seg/visualizers/visualizers.py
-    - cs_sem_seg/visualizers/visualizers_utils.py
