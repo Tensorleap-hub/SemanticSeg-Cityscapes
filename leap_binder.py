@@ -11,7 +11,7 @@ from code_loader.contract.enums import (
 from numpy import ndarray
 
 from cs_sem_seg.configs import *
-from cs_sem_seg.data.cs_data import CATEGORIES
+from cs_sem_seg.data.cs_data import CATEGORIES, CATEGORIES_IDS
 from cs_sem_seg.utils.tl_utils import subset_images
 from cs_sem_seg.utils.visualizers_utils import get_custom_ce_loss_overlayed_img, get_cityscape_mask_img, get_masked_img
 from cs_sem_seg.utils.visualizers_utils import unnormalize_image
