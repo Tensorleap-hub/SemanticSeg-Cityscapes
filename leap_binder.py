@@ -12,7 +12,7 @@ from numpy import ndarray
 
 from cs_sem_seg.configs import *
 from cs_sem_seg.data.cs_data import CATEGORIES, CATEGORIES_IDS
-from cs_sem_seg.utils.tl_utils import subset_images
+from cs_sem_seg.utils.tl_utils import load_data, load_test_data
 from cs_sem_seg.utils.visualizers_utils import get_custom_ce_loss_overlayed_img, get_cityscape_mask_img, get_masked_img
 from cs_sem_seg.utils.visualizers_utils import unnormalize_image
 from cs_sem_seg.loss import custom_ce_loss
@@ -118,7 +118,8 @@ def loss_visualizer(image: npt.NDArray[np.float32], prediction: npt.NDArray[np.f
 
 # ----------------------------------- Binding ------------------------------------------
 
-leap_binder.set_preprocess(subset_images)
+leap_binder.set_preprocess(load_data)
+leap_binder.set_unlabeled_data_preprocess(load_test_data)
 
 leap_binder.set_input(input_image, 'normalized_image')
 

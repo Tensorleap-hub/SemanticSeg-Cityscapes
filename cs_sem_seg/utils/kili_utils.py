@@ -73,10 +73,10 @@ def _convert_annotation_to_mask(annotation: BoundingPolyAnnotation):
     mask[mask == 255] = 1
     return mask
 
-def get_killi_assets():
+
+def get_killi_assets(sub_names: List[str] = ['train', 'val', 'test'], sub_sizes: List[int] = [5, 5, 5]) -> List[dict]:
     first = 5
     kili = _connect_to_kili()
-    sub_names = ['train', 'val', 'test']
     assets = []
     for sub in sub_names:
         assets += [kili.assets(project_id=KILI_PROJECT_ID, skip=0, first=first, metadata_where={'split': sub})]#, download_media=True, local_media_dir='nfs')
