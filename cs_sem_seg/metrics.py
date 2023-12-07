@@ -68,41 +68,6 @@ def mean_iou(y_true, y_pred):
     return iou
 
 
-def custom_ce_loss(y_true, y_pred):
-    """
-    Calculate Cross Entropy Loss Costumed for Kili segmentation Labels using TensorFlow.
-
-    Args:
-        y_true (tf.Tensor): Ground truth segmentation mask tensor - Multi-Label (Supports Occlusion)
-        y_pred (tf.Tensor): Predicted segmentation mask tensor - Multi-Class (Without Occlusions).
-
-    Returns:
-        tf.Tensor: Loss Values.
-    """
-    loss = 0.
-    batch, n = y_pred.shape[0], y_pred.shape[1]*y_pred.shape[2]     # w*h
-    for i in range(batch):
-        gt, pred = y_true[i, ...], y_pred[i, ...]
-        # TODO FLatten
-        max_pred = tf.argmax(pred, -1)     # Prediction: [w, h, c] -> [w, h, 1]
-        one_hot_pred = tf.cast(tf.one_hot(max_pred, depth=pred.shape[-1], on_value=1.0, off_value=0.0, axis=-1), dtype=tf.int32)      # Prediction: [w, h, 1] -> [w, h, c]
-        gt_matched = tf.multiply(gt, one_hot_pred, -1)   # [w, h, c]
-        gt_sum_matched = tf.reduce_sum(gt_matched, -1)   # [w, h]
-        match_loss = keras.losses.categorical_crossentropy(gt_matched, pred, from_logits=True, axis=-1)#, reduce='none')        # TODO: check that what the model outputs
-        no_match_loss = keras.losses.categorical_crossentropy(gt, pred, from_logits=True, axis=-1)
-        no_match_loss /= tf.cast(tf.reduce_sum(gt, -1), dtype=tf.float32)    # [w, h] divide the loss in number of actual targets
-        match_loss = tf.reduce_sum(tf.boolean_mask(match_loss, gt_sum_matched > 0))
-        no_match_loss = tf.reduce_sum(tf.boolean_mask(no_match_loss, gt_sum_matched == 0))
-        loss += ((match_loss + no_match_loss) / n)    # average sample loss
-    loss /= batch
-    return loss
-
-
-
-
-
-
-
 
 
 

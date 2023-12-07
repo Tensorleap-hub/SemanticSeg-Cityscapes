@@ -1,6 +1,4 @@
-import tensorflow as tf
 import numpy.typing as npt
-import json
 from typing import Dict, Any, Union
 from PIL import Image
 
@@ -15,11 +13,12 @@ from numpy import ndarray
 from cs_sem_seg.configs import *
 from cs_sem_seg.data.cs_data import CATEGORIES
 from cs_sem_seg.utils.tl_utils import subset_images
-from cs_sem_seg.visualizers.visualizers import get_loss_overlayed_img, get_cityscape_mask_img, get_masked_img
-from cs_sem_seg.visualizers.visualizers_utils import unnormalize_image
-from cs_sem_seg.metrics import mean_iou, class_mean_iou, custom_ce_loss
+from cs_sem_seg.utils.visualizers_utils import get_custom_ce_loss_overlayed_img, get_cityscape_mask_img, get_masked_img
+from cs_sem_seg.utils.visualizers_utils import unnormalize_image
+from cs_sem_seg.loss import custom_ce_loss
+from cs_sem_seg.metrics import mean_iou, class_mean_iou
 from cs_sem_seg.utils.kili_utils import _download, get_masks
-from cs_sem_seg.configs import IMAGE_SIZE, LOCAL_DIR
+from cs_sem_seg.configs import IMAGE_SIZE
 from cs_sem_seg.data.cs_data import Cityscapes
 
 
@@ -113,7 +112,7 @@ def cityscape_segmentation_visualizer(mask: npt.NDArray[np.uint8]) -> LeapImage:
 
 def loss_visualizer(image: npt.NDArray[np.float32], prediction: npt.NDArray[np.float32],
                     gt: npt.NDArray[np.float32]) -> LeapImage:
-    overlayed_image = get_loss_overlayed_img(image, prediction, gt)
+    overlayed_image = get_custom_ce_loss_overlayed_img(image, prediction, gt)
     return LeapImage(overlayed_image)
 
 

@@ -5,7 +5,7 @@ entryFile: leap_binder.py
 include:
     - leap_binder.py
     - cs_sem_seg/configs.py
-    - cs_sem_seg/utils/*
-    - cs_sem_seg/visualizers/*
-    - cs_sem_seg/data/cs_data.py
     - cs_sem_seg/metrics.py
+    - cs_sem_seg/loss.py
+    - cs_sem_seg/utils/*
+    - cs_sem_seg/data/cs_data.py
