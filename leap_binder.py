@@ -17,7 +17,7 @@ from cs_sem_seg.data.cs_data import CATEGORIES
 from cs_sem_seg.utils.tl_utils import subset_images
 from cs_sem_seg.visualizers.visualizers import get_loss_overlayed_img, get_cityscape_mask_img, get_masked_img
 from cs_sem_seg.visualizers.visualizers_utils import unnormalize_image
-from cs_sem_seg.metrics import mean_iou, class_mean_iou
+from cs_sem_seg.metrics import mean_iou, class_mean_iou, custom_ce_loss
 from cs_sem_seg.utils.kili_utils import _download, get_masks
 from cs_sem_seg.configs import IMAGE_SIZE, LOCAL_DIR
 from cs_sem_seg.data.cs_data import Cityscapes
@@ -25,7 +25,7 @@ from cs_sem_seg.data.cs_data import Cityscapes
 
 # ----------------------------------- Input ------------------------------------------
 
-def non_normalized_input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
+def load_input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     data = data.data[idx]
     kili_external_id = data['externalId']
     # img_url = data['content']
@@ -36,7 +36,7 @@ def non_normalized_input_image(idx: int, data: PreprocessResponse) -> np.ndarray
 
 
 def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
-    img = non_normalized_input_image(idx, data)
+    img = load_input_image(idx, data)
     normalized_image = (img - IMAGE_MEAN) / IMAGE_STD
     return normalized_image.astype(float)
 
@@ -63,7 +63,6 @@ def metadata_idx(idx: int, data: PreprocessResponse) -> int:
     return idx
 
 
-
 def metadata_json_data(idx: int, data: PreprocessResponse) -> Dict[str, Union[str, Any]]:
     data = data.data[idx]
     json_data = dict()
@@ -76,15 +75,15 @@ def metadata_json_data(idx: int, data: PreprocessResponse) -> Dict[str, Union[st
 def metadata_class(idx: int, data: PreprocessResponse) -> dict:
     kili_external_id = data.data[idx]['externalId']
     mask, cat_cnt = get_masks(kili_external_id)
-    res = dict(zip([f'{c}_obj_cnt' for c in CATEGORIES], cat_cnt))
+    res = dict(zip([f'{c}_obj_cnt' for c in CATEGORIES], [int(cnt) for cnt in cat_cnt]))
     for i, c in enumerate(CATEGORIES):
         mask_i = mask[..., i]
-        res[f'{c}_percent'] = (mask_i.sum() / mask_i.size).round(3).astype(np.float32)
+        res[f'{c}_percent'] = float(np.round(mask_i.sum() / mask_i.size, 3))
     return res
 
 
 def metadata_brightness(idx: int, data: PreprocessResponse) -> ndarray:
-    img = non_normalized_input_image(idx, data)
+    img = load_input_image(idx, data)
     return np.mean(img)
 
 
@@ -122,7 +121,6 @@ def loss_visualizer(image: npt.NDArray[np.float32], prediction: npt.NDArray[np.f
 
 leap_binder.set_preprocess(subset_images)
 
-
 leap_binder.set_input(input_image, 'normalized_image')
 
 leap_binder.set_ground_truth(ground_truth_mask, 'mask')
@@ -139,5 +137,7 @@ leap_binder.set_visualizer(image_visualizer, 'image_visualizer', LeapDataType.Im
 leap_binder.set_visualizer(mask_visualizer, 'mask_visualizer', LeapDataType.ImageMask)
 leap_binder.set_visualizer(cityscape_segmentation_visualizer, 'cityscapes_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(loss_visualizer, 'loss_visualizer', LeapDataType.Image)
+
+leap_binder.add_custom_loss(custom_ce_loss, 'custom_CE_loss')
 
 leap_binder.add_prediction('seg_mask', CATEGORIES)
