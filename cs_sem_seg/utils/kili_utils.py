@@ -1,5 +1,5 @@
 import os
-from typing import Optional, List
+from typing import Optional, List, Tuple
 import urllib.request
 from functools import lru_cache
 from kili.client import Kili
@@ -16,7 +16,7 @@ def _connect_to_kili() -> Kili:
     return Kili(api_key=os.environ['AUTH_SECRET'])
 
 
-def _download(kili_external_id: str, local_file_dir: Optional[str] = None) -> str:
+def _download(kili_external_id: str, kili: Kili = None, local_file_dir: Optional[str] = None) -> str:
 
     filename = kili_external_id + ".png"
 
@@ -30,7 +30,7 @@ def _download(kili_external_id: str, local_file_dir: Optional[str] = None) -> st
     if os.path.exists(local_file_path):
         return local_file_path
 
-    kili = _connect_to_kili()
+    kili = _connect_to_kili() if kili is None else kili
 
     kili.assets(
         project_id=KILI_PROJECT_ID,
@@ -57,20 +57,21 @@ def _convert_annotation_to_mask(annotation: BoundingPolyAnnotation):
     return mask
 
 
-def get_killi_assets(sub_names: List[str] = ['train', 'val', 'test'], sub_sizes: List[int] = [5, 5, 5]) -> List[dict]:
+def get_killi_assets(sub_names: List[str] = ['train', 'val', 'test'], sub_sizes: List[int] = [5, 5, 5]) -> Tuple[List[dict], Kili]:
     assert len(sub_names) == len(sub_sizes)
     kili = _connect_to_kili()
     assets, labels = [], []
     for sub, sub_size in zip(sub_names, sub_sizes):
         assets += [kili.assets(project_id=KILI_PROJECT_ID, skip=0, first=sub_size, metadata_where={'split': sub})]#, download_media=True, local_media_dir='nfs')
         # labels += [kili.labels(project_id=KILI_PROJECT_ID, fields=['jsonResponse'], skip=0, metadata_where={'split': sub})]
-    return assets
+    return assets, kili
 
 
 
-def get_masks(kili_external_id: str):
+def get_masks(kili_external_id: str, kili: Kili = None):
 
-    kili = _connect_to_kili()
+    kili = _connect_to_kili() if kili is None else kili
+
     labels = kili.labels(
         project_id=KILI_PROJECT_ID,
         asset_external_id_in=[kili_external_id],

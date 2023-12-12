@@ -25,11 +25,12 @@ from cs_sem_seg.data.cs_data import Cityscapes
 # ----------------------------------- Input ------------------------------------------
 
 def load_input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
-    data = data.data[idx]
+    kili = data.data['kili']
+    data = data.data['data'][idx]
     kili_external_id = data['externalId']
     # img_url = data['content']
     # fpath = download(kili_external_id, img_url, LOCAL_DIR)
-    fpath = _download(kili_external_id)
+    fpath = _download(kili_external_id, kili)
     img = np.array(Image.open(fpath).convert('RGB').resize(IMAGE_SIZE)) / 255.
     return img
 
@@ -42,8 +43,9 @@ def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
 # ----------------------------------- GT ------------------------------------------
 
 def ground_truth_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
-    kili_external_id = data.data[idx]['externalId']
-    mask, _ = get_masks(kili_external_id)
+    kili = data.data['kili']
+    kili_external_id = data.data['data'][idx]['externalId']
+    mask, _ = get_masks(kili_external_id, kili)
     return mask
 
 # ----------------------------------- Metadata ------------------------------------------
@@ -63,7 +65,7 @@ def metadata_idx(idx: int, data: PreprocessResponse) -> int:
 
 
 def metadata_json_data(idx: int, data: PreprocessResponse) -> Dict[str, Union[str, Any]]:
-    data = data.data[idx]
+    data = data.data['data'][idx]
     json_data = dict()
     json_data['kili_external_id'] = data['externalId']
     json_data.update(data['jsonMetadata'])
@@ -72,8 +74,9 @@ def metadata_json_data(idx: int, data: PreprocessResponse) -> Dict[str, Union[st
 
 
 def metadata_class(idx: int, data: PreprocessResponse) -> dict:
-    kili_external_id = data.data[idx]['externalId']
-    mask, cat_cnt = get_masks(kili_external_id)
+    kili = data.data['kili']
+    kili_external_id = data.data['data'][idx]['externalId']
+    mask, cat_cnt = get_masks(kili_external_id, kili)
     res = dict(zip([f'{c}_obj_cnt' for c in CATEGORIES], [int(cnt) for cnt in cat_cnt]))
     for i, c in enumerate(CATEGORIES):
         mask_i = mask[..., i]
@@ -84,13 +87,6 @@ def metadata_class(idx: int, data: PreprocessResponse) -> dict:
 def metadata_brightness(idx: int, data: PreprocessResponse) -> ndarray:
     img = load_input_image(idx, data)
     return np.mean(img)
-
-
-def metadata_filename_city_dataset(idx: int, data: PreprocessResponse) -> Dict[str, Any]:
-    res = {'file_names': data.data['file_names'][idx],
-           'cities': data.data['cities'][idx]
-           }
-    return res
 
 
 # ----------------------------------- Visualizers ------------------------------------------

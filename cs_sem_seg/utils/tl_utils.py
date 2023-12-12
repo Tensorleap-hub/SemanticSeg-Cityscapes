@@ -11,16 +11,16 @@ def load_data() -> List[PreprocessResponse]:
     responses = []
     sub_sizes = [TRAIN_SIZE, VAL_SIZE]
     sub_names = ["train", "val"]
-    kili_assets = get_killi_assets(sub_names, sub_sizes)
+    kili_assets, kili = get_killi_assets(sub_names, sub_sizes)
     for i, title in enumerate(sub_names):
-        responses += [PreprocessResponse(data=kili_assets[i], length=min(sub_sizes[i], len(kili_assets[i])))]
+        responses += [PreprocessResponse(data=dict(data=kili_assets[i], kili=kili), length=min(sub_sizes[i], len(kili_assets[i])))]
     return responses
 
 
 def load_test_data() -> PreprocessResponse:
     sub_size = [TEST_SIZE]
     sub_names = ["test"]
-    kili_assets = get_killi_assets(sub_names, sub_size)[0]
-    responses = PreprocessResponse(data=kili_assets, length=min(sub_size[0], len(kili_assets)))
+    kili_assets, kili = get_killi_assets(sub_names, sub_size)
+    responses = PreprocessResponse(data=dict(data=kili_assets[0], kili=kili), length=min(sub_size[0], len(kili_assets)))
     return responses
 
