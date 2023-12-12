@@ -48,13 +48,13 @@ def ground_truth_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
 
 # ----------------------------------- Metadata ------------------------------------------
 
-def get_categorical_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
-    data = data.data
-    cloud_path = data['gt_path'][idx % data["real_size"]]
-    fpath = _download(cloud_path)
-    mask = np.array(Image.open(fpath).resize(IMAGE_SIZE, Image.Resampling.NEAREST))
-    encoded_mask = Cityscapes.encode_target_cityscapes(mask)
-    return encoded_mask
+# def get_categorical_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
+#     data = data.data
+#     cloud_path = data['gt_path'][idx % data["real_size"]]
+#     fpath = _download(cloud_path)
+#     mask = np.array(Image.open(fpath).resize(IMAGE_SIZE, Image.Resampling.NEAREST))
+#     encoded_mask = Cityscapes.encode_target_cityscapes(mask)
+#     return encoded_mask
 
 
 def metadata_idx(idx: int, data: PreprocessResponse) -> int:
