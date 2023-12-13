@@ -8,7 +8,7 @@ PROJECT_ID = 'tl-private-dev-project'
 KILI_PROJECT_ID = "clpbb902w01bg087p9o6l0691"
 
 # --------------- Data --------------------
-LOCAL_DIR = '/nfs' #os.path.join("~/.cache/kili/projects", KILI_PROJECT_ID, "assets")       # todo: change to nfs
+LOCAL_DIR = '/nfs' # os.path.join("~/.cache/kili/projects", KILI_PROJECT_ID, "assets")       # todo: change to nfs x
 NORM_CS = False
 SEED = 42
 NUM_CLASSES = 19

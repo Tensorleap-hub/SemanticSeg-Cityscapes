@@ -67,21 +67,37 @@ def get_killi_assets(sub_names: List[str] = ['train', 'val', 'test'], sub_sizes:
     return assets, kili
 
 
+#
+# def get_masks(kili_external_id: str, kili: Kili = None):
+#
+#     kili = _connect_to_kili() if kili is None else kili
+#
+#     labels = kili.labels(
+#         project_id=KILI_PROJECT_ID,
+#         asset_external_id_in=[kili_external_id],
+#         fields=['jsonResponse'],
+#         # download_media=True,
+#         # local_media_dir='nfs'
+#         # output_format='parsed_label',
+#     )
+#     # annotations = labels[0].jobs["OBJECT_DETECTION_JOB"].annotations
+#     annotations = labels[0]['jsonResponse']['OBJECT_DETECTION_JOB']['annotations']
+#     cat_cnt = np.zeros(NUM_CLASSES).astype(np.int32)
+#     res_mask = np.zeros((IMAGE_SIZE[1], IMAGE_SIZE[0], NUM_CLASSES)).astype(np.int32)
+#     for ann in annotations:
+#         # cat = ann.category.name.lower().replace('_', ' ')
+#         cat = ann['categories'][0]['name'].lower().replace('_', ' ')
+#         if cat not in CATEGORIES_IDS:
+#             continue
+#         cat_i = CATEGORIES_IDS[cat]
+#         res_mask[..., cat_i] |= _convert_annotation_to_mask(ann)
+#         cat_cnt[cat_i] += 1
+#
+#     return res_mask, cat_cnt
 
-def get_masks(kili_external_id: str, kili: Kili = None):
 
-    kili = _connect_to_kili() if kili is None else kili
-
-    labels = kili.labels(
-        project_id=KILI_PROJECT_ID,
-        asset_external_id_in=[kili_external_id],
-        fields=['jsonResponse'],
-        # download_media=True,
-        # local_media_dir='nfs'
-        # output_format='parsed_label',
-    )
-    # annotations = labels[0].jobs["OBJECT_DETECTION_JOB"].annotations
-    annotations = labels[0]['jsonResponse']['OBJECT_DETECTION_JOB']['annotations']
+def get_masks(kili_labels):
+    annotations = kili_labels[0]['jsonResponse']['OBJECT_DETECTION_JOB']['annotations']
     cat_cnt = np.zeros(NUM_CLASSES).astype(np.int32)
     res_mask = np.zeros((IMAGE_SIZE[1], IMAGE_SIZE[0], NUM_CLASSES)).astype(np.int32)
     for ann in annotations:
@@ -94,5 +110,6 @@ def get_masks(kili_external_id: str, kili: Kili = None):
         cat_cnt[cat_i] += 1
 
     return res_mask, cat_cnt
+
 
 

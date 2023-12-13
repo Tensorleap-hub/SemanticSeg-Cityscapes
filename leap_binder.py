@@ -43,9 +43,8 @@ def input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
 # ----------------------------------- GT ------------------------------------------
 
 def ground_truth_mask(idx: int, data: PreprocessResponse) -> np.ndarray:
-    kili = data.data['kili']
-    kili_external_id = data.data['data'][idx]['externalId']
-    mask, _ = get_masks(kili_external_id, kili)
+    labels = data.data['data'][idx]['labels']
+    mask, _ = get_masks(labels)
     return mask
 
 # ----------------------------------- Metadata ------------------------------------------
