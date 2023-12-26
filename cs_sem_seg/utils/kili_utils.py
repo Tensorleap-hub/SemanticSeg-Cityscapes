@@ -16,7 +16,7 @@ def _connect_to_kili() -> Kili:
     return Kili(api_key=os.environ['AUTH_SECRET'])
 
 
-def _download(kili_external_id: str, kili: Kili = None, local_file_dir: Optional[str] = None) -> str:
+def _download(kili_external_id: str, kili: Kili = None, local_file_dir: Optional[str] = None, use_cache: bool = True) -> str:
 
     filename = kili_external_id + ".png"
 
@@ -27,7 +27,7 @@ def _download(kili_external_id: str, kili: Kili = None, local_file_dir: Optional
     local_file_path = os.path.join(local_file_dir, filename)
 
     # check if file already exists
-    if os.path.exists(local_file_path):
+    if os.path.exists(local_file_path) and use_cache:
         return local_file_path
 
     kili = _connect_to_kili() if kili is None else kili
@@ -67,7 +67,7 @@ def get_killi_assets(sub_names: List[str] = ['train', 'val', 'test'], sub_sizes:
     return assets, kili
 
 
-#
+
 # def get_masks(kili_external_id: str, kili: Kili = None):
 #
 #     kili = _connect_to_kili() if kili is None else kili
