@@ -21,6 +21,6 @@ def load_test_data() -> PreprocessResponse:
     sub_size = [TEST_SIZE]
     sub_names = ["test"]
     kili_assets, kili = get_killi_assets(sub_names, sub_size)
-    responses = PreprocessResponse(data=dict(data=kili_assets[0], kili=kili), length=min(sub_size[0], len(kili_assets)))
+    responses = PreprocessResponse(data=dict(data=kili_assets[0], kili=kili), length=min(sub_size[0], len(kili_assets[0])))
     return responses
 
