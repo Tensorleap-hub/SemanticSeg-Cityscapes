@@ -13,7 +13,7 @@ from numpy import ndarray
 from cs_sem_seg.configs import *
 from cs_sem_seg.data.cs_data import CATEGORIES, CATEGORIES_IDS
 from cs_sem_seg.utils.tl_utils import load_data, load_test_data
-from cs_sem_seg.utils.visualizers_utils import get_custom_ce_loss_overlayed_img, get_cityscape_mask_img, get_masked_img
+from cs_sem_seg.utils.visualizers_utils import get_custom_ce_loss_overlayed_img, get_cityscape_mask_img, get_masked_img, get_overlayed_mask_gt
 from cs_sem_seg.utils.visualizers_utils import unnormalize_image
 from cs_sem_seg.loss import custom_ce_loss
 from cs_sem_seg.metrics import mean_iou, class_mean_iou
@@ -31,7 +31,11 @@ def load_input_image(idx: int, data: PreprocessResponse) -> np.ndarray:
     # img_url = data['content']
     # fpath = download(kili_external_id, img_url, LOCAL_DIR)
     fpath = _download(kili_external_id, kili)
-    img = np.array(Image.open(fpath).convert('RGB').resize(IMAGE_SIZE)) / 255.
+    try:
+        img = np.array(Image.open(fpath).convert('RGB').resize(IMAGE_SIZE)) / 255.
+    except Exception as e:
+        fpath = _download(kili_external_id, kili, use_cache=False)
+        img = np.array(Image.open(fpath).convert('RGB').resize(IMAGE_SIZE)) / 255.
     return img
 
 
@@ -74,8 +78,8 @@ def metadata_json_data(idx: int, data: PreprocessResponse) -> Dict[str, Union[st
 
 def metadata_class(idx: int, data: PreprocessResponse) -> dict:
     kili = data.data['kili']
-    kili_external_id = data.data['data'][idx]['externalId']
-    mask, cat_cnt = get_masks(kili_external_id, kili)
+    labels = data.data['data'][idx]['labels']
+    mask, cat_cnt = get_masks(labels)
     res = dict(zip([f'{c}_obj_cnt' for c in CATEGORIES], [int(cnt) for cnt in cat_cnt]))
     for i, c in enumerate(CATEGORIES):
         mask_i = mask[..., i]
@@ -93,6 +97,11 @@ def metadata_brightness(idx: int, data: PreprocessResponse) -> ndarray:
 
 def image_visualizer(image: npt.NDArray[np.float32]) -> LeapImage:
     return LeapImage((unnormalize_image(image) * 255).astype(np.uint8))
+
+
+def gt_overlayed_visualizer(image: npt.NDArray[np.float32], mask: npt.NDArray[np.uint8]) -> LeapImage:
+    mask_image = get_overlayed_mask_gt(image, mask)*255
+    return LeapImage(mask_image.astype(np.uint8))
 
 
 def mask_visualizer(image: npt.NDArray[np.float32], mask: npt.NDArray[np.uint8]) -> LeapImageMask:
@@ -131,6 +140,7 @@ leap_binder.set_metadata(metadata_brightness, 'brightness')
 leap_binder.set_visualizer(image_visualizer, 'image_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(mask_visualizer, 'mask_visualizer', LeapDataType.ImageMask)
 leap_binder.set_visualizer(cityscape_segmentation_visualizer, 'cityscapes_visualizer', LeapDataType.Image)
+leap_binder.set_visualizer(gt_overlayed_visualizer, 'gt_overlayed_visualizer', LeapDataType.Image)
 leap_binder.set_visualizer(loss_visualizer, 'loss_visualizer', LeapDataType.Image)
 
 leap_binder.add_custom_loss(custom_ce_loss, 'custom_CE_loss')
