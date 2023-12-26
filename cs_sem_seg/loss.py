@@ -6,8 +6,8 @@ def get_pixel_loss(gt, pred):
 
     # Encode gt of multi-label to one hot such that: the matched index = 1 OR only zeros in case of no match.
     max_pred = tf.argmax(pred, -1)  # Prediction: [w, h, c] -> [w, h]
-    one_hot_pred = tf.cast(tf.one_hot(max_pred, depth=pred.shape[-1], on_value=1.0, off_value=0.0, axis=-1), dtype=tf.int32)  # Prediction: [w, h, 1] -> [w, h, c]
-    gt_matched = tf.multiply(gt, one_hot_pred, -1)      # [w, h, c]
+    one_hot_pred = tf.one_hot(max_pred, depth=pred.shape[-1], on_value=1.0, off_value=0.0, axis=-1)  # Prediction: [w, h, 1] -> [w, h, c]
+    gt_matched = gt*one_hot_pred      # [w, h, c]
     gt_is_matched = tf.reduce_sum(gt_matched, -1)  # [w, h]     where 1 if there is a match or 0
 
     # calc loss for pixels with matched prediction: compute CCE when target is the matched one
@@ -33,7 +33,7 @@ def custom_ce_loss(y_true, y_pred):
         tf.Tensor: Loss Values.
     """
     loss = 0.
-    batch, n = y_pred.shape[0], y_pred.shape[1]*y_pred.shape[2]     # w*h
+    batch = y_pred.shape[0] if y_pred.shape == 4 else 1
     for i in range(batch):
         gt, pred = y_true[i, ...], y_pred[i, ...]
         l_img = get_pixel_loss(gt, pred)    # gt as one hot with 1's in matching index or all 0's

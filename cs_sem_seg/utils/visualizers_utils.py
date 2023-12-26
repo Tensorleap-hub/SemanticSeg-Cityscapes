@@ -7,7 +7,7 @@ from matplotlib import cm as cmx
 import matplotlib.pyplot as plt
 
 from cs_sem_seg.configs import IMAGE_MEAN, IMAGE_STD
-from cs_sem_seg.data.cs_data import Cityscapes
+from cs_sem_seg.data.cs_data import Cityscapes, CATEGORIES, CATEGORIES_IDS
 from cs_sem_seg.loss import get_pixel_loss
 
 
@@ -42,6 +42,60 @@ def get_cityscape_mask_img(mask: npt.NDArray[np.uint8]) -> np.ndarray:
         cat_mask = mask
     cat_mask[mask.sum(-1) == 0] = 19  # this marks the place with all zeros using idx 19
     mask_image = Cityscapes.decode_target(cat_mask)
+    return mask_image
+
+
+def get_overlayed_mask_gt(image: npt.NDArray[np.float32], mask: npt.NDArray[np.uint8]) -> np.ndarray:
+    if len(mask.shape) > 2:
+        if mask.shape[-1] == 1:
+            cat_mask = np.squeeze(mask, axis=-1)
+        else:
+            cat_mask = np.argmax(mask, axis=-1)  # this introduce 0 at places where no GT is present (zero all channels)
+    else:
+        cat_mask = mask
+    cat_mask[mask.sum(-1) == 0] = 19  # this marks the place with all zeros using idx 19
+    cat_mask = np.zeros(mask.shape)
+    for i, cat in enumerate(CATEGORIES):
+        cat_mask[..., i] = np.where(mask[..., i], i, 255)
+    mask_image = Cityscapes.decode_target(cat_mask.astype(int))
+    summed_mask = np.clip((mask_image.sum(2)), 0, 255)
+    summed_mask = summed_mask/255
+    return summed_mask
+
+    def visualize_labels(mask):
+        """
+        Visualize labels from a mask with 19 channels.
+
+        Parameters:
+        - mask: Input mask with shape (height, width, 19).
+
+        Returns:
+        - vis_image: RGB image representing concatenated labels.
+        """
+        height, width, num_channels = mask.shape
+
+        # Create an empty RGB image
+        vis_image = np.zeros((height, width, 3), dtype=np.uint8)
+
+        # Generate unique colors for each label
+        label_colors = np.random.randint(0, 255, size=(num_channels, 3), dtype=np.uint8)
+
+        # Concatenate label values for each pixel
+        for channel in range(num_channels):
+            vis_image += np.expand_dims(mask[:, :, channel], axis=-1) * label_colors[channel]
+
+        return vis_image
+
+    # Example Usage:
+    # Replace 'your_mask.npy' with the path to your 19-channel mask file.
+    # The mask should be a NumPy array with shape (height, width, 19).
+    mask = np.load('path/to/your_mask.npy')
+    result_image = visualize_labels(mask)
+
+    # Display the result using matplotlib
+    plt.imshow(result_image)
+    plt.axis('off')
+    plt.show()
     return mask_image
 
 
