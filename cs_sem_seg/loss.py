@@ -33,7 +33,7 @@ def custom_ce_loss(y_true, y_pred):
         tf.Tensor: Loss Values.
     """
     loss = 0.
-    batch, n = y_pred.shape[0], y_pred.shape[1]*y_pred.shape[2]     # w*h
+    batch = y_pred.shape[0] if y_pred.shape == 4 else 1
     for i in range(batch):
         gt, pred = y_true[i, ...], y_pred[i, ...]
         l_img = get_pixel_loss(gt, pred)    # gt as one hot with 1's in matching index or all 0's
